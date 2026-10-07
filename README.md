@@ -1,58 +1,122 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# RoomFix
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+ระบบแจ้งซ่อมสำหรับอาคารพักอาศัยหนึ่งอาคาร ตั้งแต่คนพักแจ้งปัญหา ผู้ดูแลมอบหมายช่าง ช่างส่งงาน จนคนพักตรวจและยืนยันผล งานทุกชิ้นมีผู้รับผิดชอบ รูปส่วนตัว และประวัติที่ติดตามได้
 
-## About Laravel
+Built with **Laravel 13 · PHP 8.4 · React 19 · Inertia 3 · TypeScript · PostgreSQL 17**. A working full stack portfolio project with Thai UI, role policies, private uploads, automated workflow tests, and recoverable checkpoints.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+![RoomFix dashboard](docs/dashboard-desktop.png)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## ใช้ทำอะไร
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+แทนการแจ้งซ่อมที่หล่นหายในกลุ่มแชท แต่ละงานมีเลขอ้างอิงและลำดับการรับผิดชอบที่ชัดเจน
 
-## Learning Laravel
+| บทบาท | สิ่งที่ทำได้ |
+| --- | --- |
+| คนพัก | แจ้งปัญหาของห้องตัวเอง แนบรูป ติดตาม พูดคุย ยืนยันหรือเปิดงานใหม่ |
+| ผู้ดูแล | ดูงานทั้งหมด กรองงาน มอบหมายช่าง สร้างบัญชีคนพักและช่าง |
+| ช่าง | ดูงานที่ได้รับมอบหมาย เริ่มงาน ระบุผลการซ่อม ส่งให้คนพักตรวจ |
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Dashboard นับตามสิทธิ์ของผู้ใช้ มีรายการล่าสุด ประเภทงาน และงานที่ยังเปิดเกิน 3 วัน รูปเก็บใน private storage และทุกคำขอตรวจสิทธิ์ฝั่งเซิร์ฟเวอร์ การแจ้งเตือนอยู่ในระบบและแสดงเมื่อโหลดหน้าถัดไป
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## เริ่มในเครื่อง
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+ต้องมี Docker Desktop (Linux containers), Node.js 24+ และ Git ไม่ต้องเปลี่ยน PHP/XAMPP ที่ติดตั้งอยู่เดิม
 
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```sh
+cp .env.example .env
+npm ci
+docker compose build
+docker compose run --rm --no-deps app composer install --no-interaction --prefer-dist
+docker compose run --rm --no-deps app php artisan key:generate
+docker compose up -d database
+docker compose run --rm app php artisan migrate --force
+docker compose run --rm app php artisan db:seed --class=DemoSeeder --force
+npm run build
+docker compose up -d app
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Windows PowerShell ใช้ `Copy-Item .env.example .env` แทน `cp` ได้ เปิด **http://127.0.0.1:8003** แล้วเลือกบัญชีตัวอย่างบนหน้า login
 
-## Contributing
+| บัญชีตัวอย่าง | อีเมล | รหัสผ่าน |
+| --- | --- | --- |
+| ผู้ดูแล | manager@roomfix.test | RoomFixDemo!2026 |
+| คนพัก A-203 | resident@roomfix.test | RoomFixDemo!2026 |
+| คนพัก B-401 | resident2@roomfix.test | RoomFixDemo!2026 |
+| ช่าง | tech@roomfix.test | RoomFixDemo!2026 |
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+ข้อมูลทั้งหมดเป็นข้อมูลสมมติ **DemoSeeder ปฏิเสธการรันนอก local/testing** และบัญชี demo ไม่สร้างอัตโนมัติ `DatabaseSeeder` เริ่มว่าง Docker เปิดเว็บเฉพาะ loopback และไม่เปิดพอร์ต PostgreSQL ไปภายนอก
 
-## Code of Conduct
+PHP dependencies อยู่ใน named volume เพื่อหลีกเลี่ยงการอ่านไฟล์จำนวนมากบน Windows bind mount หากแก้ composer.json ให้รัน composer install ผ่าน compose อีกครั้ง Source code และรูปแนบอยู่ใน project directory; ข้อมูล PostgreSQL อยู่ใน Docker volume
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## ทดลอง workflow
 
-## Security Vulnerabilities
+1. เข้าเป็นคนพัก กดแจ้งซ่อม ระบุปัญหาและแนบรูป
+2. ออกจากระบบ เข้าเป็นผู้ดูแล เปิดงานใหม่ เลือกช่างและมอบหมาย
+3. เข้าเป็นช่าง เริ่มดำเนินการ แล้วกรอกผลการซ่อมและส่งงาน
+4. เข้าเป็นคนพัก ตรวจและยืนยัน หากยังมีปัญหา ระบุเหตุผลเพื่อเปิดงานใหม่
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+รูปสูงสุด 2 รูป รูปละ 3 MB (JPG/PNG/WebP, ไม่เกิน 3000×3000 px) ระดับเร่งด่วนใช้เพื่อจัดลำดับงาน ระบบไม่มีผู้เฝ้ารับเหตุฉุกเฉินตลอด 24 ชั่วโมง
 
-## License
+## สถาปัตยกรรมและเหตุผล
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```mermaid
+flowchart LR
+    R[Resident] --> UI[React + Inertia]
+    M[Manager] --> UI
+    T[Technician] --> UI
+    UI --> W[Laravel session + CSRF]
+    W --> P[Policies + Form Requests]
+    P --> S[TicketService: transaction + row lock]
+    S --> DB[(PostgreSQL)]
+    S --> N[Database notifications]
+    P --> F[Private photos through authorized controller]
+```
+
+Laravel + Inertia ทำให้ใช้ authentication/session/policies ชุดเดียวกับเว็บ React โดยไม่ต้องแยก API token และระบบ CORS PostgreSQL รองรับ foreign keys, indexes, transactions และล็อกงานระหว่างเปลี่ยนสถานะ React/TypeScript ช่วยจัด UI และฟอร์มตามบทบาท ค่า owner/room/status ถูกกำหนดโดยเซิร์ฟเวอร์ ไม่เชื่อจากฟอร์ม
+
+`TicketService` ตรวจ state machine และตรวจสิทธิ์ซ้ำภายใต้ row lock ป้องกันช่างคนเดิมทำงานต่อหลังถูกเปลี่ยนผู้รับผิดชอบ การแก้ไขสถานะ ประวัติ และ notification อยู่ใน transaction เดียวกัน รูปที่อัปโหลดจะลบทิ้งหาก transaction ล้มเหลว
+
+```mermaid
+stateDiagram-v2
+    [*] --> new
+    new --> assigned: manager assigns
+    assigned --> in_progress: assigned technician starts
+    in_progress --> awaiting_confirmation: technician finishes with note
+    awaiting_confirmation --> closed: resident confirms
+    awaiting_confirmation --> reopened: resident explains unresolved problem
+    reopened --> assigned: manager assigns again
+    closed --> [*]
+```
+
+ไฟล์หลัก: `routes/web.php`, `app/Policies/TicketPolicy.php`, `app/Services/TicketService.php`, `app/Http/Requests`, `resources/js/pages`, `database/migrations`
+
+## ตรวจสอบ
+
+```sh
+docker compose exec -T app php artisan test --compact
+docker compose exec -T app vendor/bin/pint --test
+npm run build
+# ครั้งแรกในเครื่องที่ไม่มี Chrome: npx playwright install chromium
+# ตั้ง PLAYWRIGHT_CHANNEL=chromium เพื่อใช้ browser ที่ Playwright ติดตั้ง
+npm run test:e2e
+```
+
+Feature tests บังคับ SQLite in-memory **ก่อน Laravel boot** และหยุดทันทีถ้าฐานข้อมูลไม่ตรง ป้องกันค่า Docker/environment ทำให้ `RefreshDatabase` ล้างฐานข้อมูลแอป E2E ใช้เว็บจริงกับ PostgreSQL และสร้างข้อมูลสมมติของตัวเอง ไม่ reset ฐานข้อมูล ถ้าใช้ฐานข้อมูล demo เดิมหลายครั้งจะมีงานทดสอบเพิ่ม
+
+Playwright ตรวจ workflow ครบสามบทบาท รูปข้ามห้องต้องถูกปฏิเสธ ประวัติและแจ้งเตือน การสร้างบัญชีโดยผู้ดูแล การค้นหา และหน้าจอมือถือ GitHub Actions ทำ build/Pint/PHPUnit และ E2E กับ PostgreSQL อัตโนมัติ
+
+## Checkpoint / rollback
+
+ดู [ขั้นตอนสำรองและกู้คืน](docs/recovery.md) มี ZIP ของโค้ดพร้อม SHA-256 และ snapshot ฐานข้อมูลพร้อมรูปแนบ การ restore สร้างโฟลเดอร์และฐานข้อมูลใหม่ ไม่ทับระบบที่ใช้อยู่ ไม่ใช้ git reset --hard หรือ migrate:fresh กับฐานข้อมูลใช้งาน
+
+## นำไปใช้งานจริง
+
+Compose ชุดนี้เป็น **local development runtime** ใช้ PHP development server การขึ้น production ต้องจัด PHP-FPM + web server + HTTPS และ persistent private storage เอง ดู [deployment checklist](docs/deployment.md)
+
+รุ่นนี้รองรับหนึ่งอาคาร ผู้ดูแลสร้างบัญชีและแจ้งรหัสผ่านผ่านช่องทางส่วนตัว ยังไม่มี self-registration, email password reset, นัดหมายช่าง, ค่าใช้จ่าย, realtime/email/LINE notification หรือระบบแยกหลายอาคาร รูปต้นฉบับไม่ได้ลบ EXIF ผู้ใช้ควรใช้ภาพที่ไม่มีข้อมูลอ่อนไหวเกินจำเป็น
+
+## Portfolio description
+
+> Built a Thai maintenance management system with Laravel, React/Inertia and PostgreSQL. Implemented role-based authorization, private photo access, transactional repair workflows with audit history, in-app notifications, automated integration/browser tests, and non-destructive code/database recovery.
+
+License: MIT. Sarabun font licensed under SIL OFL; see public/fonts/OFL.txt.

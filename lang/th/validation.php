@@ -1,4 +1,5 @@
 <?php
+
 return [
     'required' => 'กรุณากรอก :attribute',
     'required_if' => 'กรุณากรอก :attribute สำหรับขั้นตอนนี้',

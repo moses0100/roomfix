@@ -1,0 +1,72 @@
+name: Verify RoomFix
+on:
+  push:
+    branches: [main, 'codex/**']
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: roomfix
+          POSTGRES_USER: roomfix
+          POSTGRES_PASSWORD: roomfix_ci_only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd 'pg_isready -U roomfix -d roomfix'
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      APP_ENV: testing
+      APP_DEBUG: 'false'
+      APP_URL: http://127.0.0.1:8003
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: '5432'
+      DB_DATABASE: roomfix
+      DB_USERNAME: roomfix
+      DB_PASSWORD: roomfix_ci_only
+      ROOMFIX_DEMO: 'true'
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_pgsql, pdo_sqlite, intl, mbstring, dom, zip
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: cp .env.example .env
+      - run: composer install --no-interaction --prefer-dist
+      - run: php artisan key:generate
+      - run: vendor/bin/pint --test
+      - run: php artisan test --compact
+      - run: npm ci
+      - run: npm run build
+      - run: php artisan migrate --force && php artisan db:seed --class=DemoSeeder --force
+      - run: npx playwright install --with-deps chromium
+      - name: Start application
+        run: |
+          php artisan serve --host=127.0.0.1 --port=8003 > /tmp/roomfix-server.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8003/up > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/roomfix-server.log
+          exit 1
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-failure-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 3

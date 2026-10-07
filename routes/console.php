@@ -15,10 +15,14 @@ Artisan::command('roomfix:manager {email} {--name=ผู้ดูแลอาค
         'password' => 'required|string|min:12|max:200|confirmed',
     ]);
     if ($validator->fails()) {
-        foreach ($validator->errors()->all() as $error) $this->error($error);
+        foreach ($validator->errors()->all() as $error) {
+            $this->error($error);
+        }
+
         return 1;
     }
     User::create(['email' => $email, 'name' => $name, 'password' => $password, 'role' => 'manager']);
     $this->info('สร้างบัญชีผู้ดูแลแล้ว');
+
     return 0;
 })->purpose('Create an initial manager with a hidden password prompt');

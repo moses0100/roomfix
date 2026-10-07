@@ -197,7 +197,9 @@ class RoomFixTest extends TestCase
 
     public function test_login_attempts_are_rate_limited(): void
     {
-        for ($i = 0; $i < 6; $i++) $this->post('/login', ['email' => 'rate@roomfix.test', 'password' => 'wrong'])->assertRedirect();
+        for ($i = 0; $i < 6; $i++) {
+            $this->post('/login', ['email' => 'rate@roomfix.test', 'password' => 'wrong'])->assertRedirect();
+        }
         $this->post('/login', ['email' => 'rate@roomfix.test', 'password' => 'wrong'])->assertStatus(429);
     }
 

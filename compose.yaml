@@ -4,7 +4,7 @@ services:
     build: .
     image: roomfix-php:local
     ports: ["127.0.0.1:8003:8000"]
-    volumes: [".:/app"]
+    volumes: [".:/app", "roomfix-vendor:/app/vendor", "./docker/php.ini:/usr/local/etc/php/conf.d/roomfix.ini:ro"]
     environment:
       DB_CONNECTION: pgsql
       DB_HOST: database
@@ -31,3 +31,4 @@ services:
     restart: unless-stopped
 volumes:
   roomfix-data:
+  roomfix-vendor:

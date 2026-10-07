@@ -1,19 +1,26 @@
 <?php
+
 namespace Database\Seeders;
+
 use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+
 class DemoSeeder extends Seeder
 {
     public function run(): void
     {
-        if (! app()->environment('local', 'testing')) throw new \RuntimeException('Demo accounts are forbidden outside local/testing');
+        if (! app()->environment('local', 'testing')) {
+            throw new \RuntimeException('Demo accounts are forbidden outside local/testing');
+        }
         $make = fn ($email, $name, $role, $room = null) => User::firstOrCreate(['email' => $email], ['name' => $name, 'role' => $role, 'room' => $room, 'password' => 'RoomFixDemo!2026']);
         $manager = $make('manager@roomfix.test', 'พิมพ์ชนก', 'manager');
         $tech = $make('tech@roomfix.test', 'ช่างต้น', 'technician');
         $resident = $make('resident@roomfix.test', 'มินตรา', 'resident', 'A-203');
         $other = $make('resident2@roomfix.test', 'ณัฐ', 'resident', 'B-401');
-        if (Ticket::count()) return;
+        if (Ticket::count()) {
+            return;
+        }
         foreach ([
             ['ก๊อกน้ำอ่างล้างหน้ารั่ว', 'น้ำหยดตลอดทั้งวัน ปิดก๊อกแน่นแล้วยังไม่หยุด กรุณาช่วยตรวจให้หน่อยค่ะ', 'plumbing', 'high', 'new', $resident],
             ['แอร์ไม่เย็นและมีเสียงดัง', 'เปิดแอร์มาประมาณหนึ่งชั่วโมงยังไม่เย็น มีเสียงจากเครื่องด้านใน', 'aircon', 'normal', 'assigned', $other],
@@ -24,7 +31,9 @@ class DemoSeeder extends Seeder
         ] as $i => [$title, $description, $category, $urgency, $status, $owner]) {
             $ticket = Ticket::create(['title' => $title, 'description' => $description, 'category' => $category, 'urgency' => $urgency, 'status' => $status, 'resident_id' => $owner->id, 'room' => $owner->room, 'assignee_id' => in_array($status, ['assigned', 'in_progress', 'awaiting_confirmation', 'closed']) ? $tech->id : null, 'created_at' => now()->subHours($i * 18 + 2), 'closed_at' => $status === 'closed' ? now()->subHour() : null, 'completion_note' => in_array($status, ['awaiting_confirmation', 'closed']) ? 'ตรวจและแก้ไขเรียบร้อย ทดสอบการใช้งานแล้ว' : null]);
             $ticket->events()->create(['actor_id' => $owner->id, 'action' => 'create', 'message' => 'ตัวอย่าง: ผู้พักแจ้งปัญหา']);
-            if ($ticket->assignee_id) $ticket->events()->create(['actor_id' => $manager->id, 'action' => 'assign', 'message' => 'ตัวอย่าง: มอบหมายให้ช่างต้น']);
+            if ($ticket->assignee_id) {
+                $ticket->events()->create(['actor_id' => $manager->id, 'action' => 'assign', 'message' => 'ตัวอย่าง: มอบหมายให้ช่างต้น']);
+            }
         }
     }
 }
