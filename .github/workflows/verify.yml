@@ -18,7 +18,7 @@ jobs:
           POSTGRES_PASSWORD: roomfix_ci_only
         ports: ['5432:5432']
         options: >-
-          --health-cmd 'pg_isready -U roomfix -d roomfix'
+          --health-cmd "pg_isready -U roomfix -d roomfix"
           --health-interval 5s --health-timeout 5s --health-retries 12
     env:
       APP_ENV: testing
