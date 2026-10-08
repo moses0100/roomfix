@@ -6,6 +6,20 @@ use Illuminate\Support\Facades\DB;
 
 class DemoSandbox
 {
+    public function lock(bool $exclusive): void
+    {
+        if (DB::connection()->getDriverName() === 'pgsql') {
+            DB::select($exclusive ? 'select pg_advisory_lock(8240317)' : 'select pg_advisory_lock_shared(8240317)');
+        }
+    }
+
+    public function unlock(bool $exclusive): void
+    {
+        if (DB::connection()->getDriverName() === 'pgsql') {
+            DB::select($exclusive ? 'select pg_advisory_unlock(8240317)' : 'select pg_advisory_unlock_shared(8240317)');
+        }
+    }
+
     public function assertIsolated(): void
     {
         if (! config('roomfix.demo') || ! config('roomfix.isolated_demo')) {

@@ -34,13 +34,16 @@ class ResetDemo extends Command
         }
         $this->callSilent('down', ['--retry' => 30]);
         try {
+            // Wait for in-flight web requests before replacing sample data.
+            $sandbox->lock(true);
             DB::transaction(function () {
                 foreach (['ticket_events', 'ticket_photos', 'tickets', 'notifications', 'sessions', 'password_reset_tokens', 'users'] as $table) {
                     DB::table($table)->delete();
                 }
-                (new DemoSeeder)->run();
+                app(DemoSeeder::class)->run();
             });
         } finally {
+            $sandbox->unlock(true);
             $this->callSilent('up');
         }
         $this->info('Demo restored: 4 accounts and 6 tickets. Sessions invalidated.');

@@ -11,11 +11,18 @@ class EnsureDemoSandbox
     public function handle(Request $request, Closure $next)
     {
         if (config('roomfix.isolated_demo')) {
+            $sandbox = app(DemoSandbox::class);
             try {
-                app(DemoSandbox::class)->assertIsolated();
+                $sandbox->assertIsolated();
             } catch (\RuntimeException $exception) {
                 report($exception);
                 abort(503, 'โหมดเดโมยังตั้งค่าไม่ครบ กรุณาติดต่อผู้ดูแล');
+            }
+            $sandbox->lock(false);
+            try {
+                return $next($request);
+            } finally {
+                $sandbox->unlock(false);
             }
         }
 
