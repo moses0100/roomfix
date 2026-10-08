@@ -144,7 +144,7 @@ export default function Layout({
                         {flash.success && (
                             <div className="flash" role="status">
                                 <Check size={17} />
-                                {flash.success}
+                                <span>{flash.success}</span>
                             </div>
                         )}
                         {children}
