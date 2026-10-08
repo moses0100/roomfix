@@ -38,3 +38,14 @@ Branch: codex/roomfix-appointments. Additive migration adds booking fields on ex
 - Full local browser suite: 6 tests pass, including all existing appointment, repair/privacy, user-management and mobile-navigation workflows.
 - First report CI run exposed shared-account login throttling: the mobile test's login returned HTTP 429 after the new report check pushed the first resident above six logins/minute. The read-only report access check now uses the second demo resident. Production rate limits remain unchanged; no sleeps or larger timeouts added.
 - Pre-change code archive: backups/code/before-reports-20261008.zip. Recovery remains non-destructive; no app database reset.
+
+## Isolated demo update — 2026-10-08
+
+- Dedicated Compose project `roomfix-demo`: separate PostgreSQL container/database, app key, session cookie, storage, bootstrap caches and dependency volume. Local port 8004; original app stays on 8003.
+- Full PHP suite: 38 tests / 328 assertions pass. Covers explicit sandbox flags, disabled shared-account edits, normal-mode account behavior, production debug/database refusal, read-only operator checks, reset confirmation, sample restoration, session invalidation and seed-failure rollback.
+- Browser verification: normal app suite passes 6 tests (dedicated demo test skipped); isolated demo test passes separately. Demo workflow includes role selection, hidden account editing, fictional repair creation, separate session cookie, and mobile overflow/screenshot.
+- Actual PostgreSQL demo reset restored 4 accounts / 6 sample tickets / 0 sessions. Main database counts before and after reset were identical: 7 users / 14 tickets / 63 events. Later normal E2E runs add their own fictional records as documented.
+- Read-only `roomfix:demo-check` rejects the original PostgreSQL database even with demo flags and accepts the dedicated database. A proposed destructive refusal test against the main database was blocked by automatic approval review; it was replaced with this read-only check.
+- Initial demo web verification found Laravel `serve` dropping container environment overrides when reloading the shared `.env`. `--no-reload` preserves the isolated environment in its child process; rerun passed.
+- Source checkpoint before work: backups/code/before-demo-20261008.zip. Credentials in `.env.demo` are generated separately, never printed, and ignored by Git.
+- Public hosting and automatic reset scheduling are not enabled. Uploaded files remain in the demo-only volume; operator retention policy is required before public hosting.
