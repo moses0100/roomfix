@@ -70,7 +70,9 @@ test("resident has no report navigation and cannot access report downloads", asy
     await page.goto("/login");
     await page
         .getByLabel("อีเมล", { exact: true })
-        .fill("resident@roomfix.test");
+        // Use the second demo resident for this read-only check so the repair
+        // workflows do not exhaust the first resident's login rate limit.
+        .fill("resident2@roomfix.test");
     await page.getByLabel("รหัสผ่าน", { exact: true }).fill("RoomFixDemo!2026");
     await page
         .getByRole("button", { name: "เข้าสู่ระบบ", exact: true })

@@ -36,4 +36,5 @@ Branch: codex/roomfix-appointments. Additive migration adds booking fields on ex
 - Four report feature tests cover manager-only access for HTML and CSV, Thai midnight boundaries, current-status aggregation of tickets created in the date window, invalid/reversed/future/empty dates, UTF-8 CSV quoting and formula neutralization.
 - Two new Chrome tests cover real CSV download, applied filters, empty reports, resident access refusal, and the 390px mobile layout. Desktop/mobile report screenshots inspected.
 - Full local browser suite: 6 tests pass, including all existing appointment, repair/privacy, user-management and mobile-navigation workflows.
+- First report CI run exposed shared-account login throttling: the mobile test's login returned HTTP 429 after the new report check pushed the first resident above six logins/minute. The read-only report access check now uses the second demo resident. Production rate limits remain unchanged; no sleeps or larger timeouts added.
 - Pre-change code archive: backups/code/before-reports-20261008.zip. Recovery remains non-destructive; no app database reset.
