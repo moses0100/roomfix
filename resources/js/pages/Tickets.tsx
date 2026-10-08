@@ -17,11 +17,14 @@ export default function Tickets({
     filters,
 }: {
     tickets: Pagination;
-    filters: { q?: string; status?: string };
+    filters: { q?: string; status?: string; overdue?: string | boolean };
 }) {
     const user = usePage<Shared>().props.auth.user!;
     const [search, setSearch] = useState(filters.q ?? "");
     const [status, setStatus] = useState(filters.status ?? "");
+    const [overdue, setOverdue] = useState(
+        filters.overdue === true || filters.overdue === "1",
+    );
     return (
         <Layout title="รายการแจ้งซ่อม">
             <PageHeading
@@ -41,7 +44,7 @@ export default function Tickets({
                         e.preventDefault();
                         router.get(
                             "/tickets",
-                            { q: search, status },
+                            { q: search, status, overdue: overdue ? 1 : 0 },
                             { preserveState: true, replace: true },
                         );
                     }}
@@ -68,8 +71,19 @@ export default function Tickets({
                             </option>
                         ))}
                     </select>
+                    <label className="overdue-toggle">
+                        <input
+                            type="checkbox"
+                            checked={overdue}
+                            onChange={(e) => setOverdue(e.target.checked)}
+                        />
+                        งานค้างเกิน 3 วัน
+                    </label>
                     <button>ค้นหา</button>
-                    {(filters.q || filters.status) && (
+                    {(filters.q ||
+                        filters.status ||
+                        filters.overdue === true ||
+                        filters.overdue === "1") && (
                         <Link href="/tickets" className="button quiet">
                             ล้างตัวกรอง
                         </Link>

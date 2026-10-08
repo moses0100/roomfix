@@ -25,8 +25,15 @@ class TicketService
                 throw ValidationException::withMessages(['assignee_id' => 'มอบหมายได้เฉพาะงานใหม่ งานเปิดใหม่ หรืองานที่ยังไม่เริ่ม']);
             }
             $assignee = User::where('role', 'technician')->findOrFail($assigneeId);
-            $locked->update(['assignee_id' => $assignee->id, 'status' => 'assigned']);
+            if ($locked->status === 'assigned' && $locked->assignee_id === $assignee->id) {
+                return;
+            }
+            $hadAppointment = $locked->appointment_status !== null;
+            $locked->update(['assignee_id' => $assignee->id, 'status' => 'assigned', 'appointment_start' => null, 'appointment_end' => null, 'appointment_status' => null, 'appointment_note' => null, 'appointment_response_note' => null, 'appointment_version' => $locked->appointment_version + 1]);
             $message = "มอบหมายงานให้ {$assignee->name}";
+            if ($hadAppointment) {
+                $message .= ' และยกเลิกนัดเดิม ต้องเสนอนัดใหม่';
+            }
             $locked->events()->create(['actor_id' => $actor->id, 'action' => 'assign', 'message' => $message]);
             $this->notify($locked, $actor, $message);
         });
@@ -48,6 +55,9 @@ class TicketService
             };
             if ($locked->status !== $expected) {
                 throw ValidationException::withMessages(['action' => 'สถานะงานเปลี่ยนแล้ว กรุณาโหลดหน้าใหม่']);
+            }
+            if ($action === 'start' && $locked->appointment_status !== null && $locked->appointment_status !== 'confirmed') {
+                throw ValidationException::withMessages(['action' => 'มีการเสนอนัดแล้ว ต้องให้คนพักยืนยันนัดก่อนเริ่มงาน']);
             }
             $changes = ['status' => $next];
             if ($action === 'finish') {

@@ -113,10 +113,25 @@ Playwright ตรวจ workflow ครบสามบทบาท รูปข�
 
 Compose ชุดนี้เป็น **local development runtime** ใช้ PHP development server การขึ้น production ต้องจัด PHP-FPM + web server + HTTPS และ persistent private storage เอง ดู [deployment checklist](docs/deployment.md)
 
-รุ่นนี้รองรับหนึ่งอาคาร ผู้ดูแลสร้างบัญชีและแจ้งรหัสผ่านผ่านช่องทางส่วนตัว ยังไม่มี self-registration, email password reset, นัดหมายช่าง, ค่าใช้จ่าย, realtime/email/LINE notification หรือระบบแยกหลายอาคาร รูปต้นฉบับไม่ได้ลบ EXIF ผู้ใช้ควรใช้ภาพที่ไม่มีข้อมูลอ่อนไหวเกินจำเป็น
+รุ่นนี้รองรับหนึ่งอาคาร ผู้ดูแลสร้างบัญชีและแจ้งรหัสผ่านผ่านช่องทางส่วนตัว ยังไม่มี self-registration, email password reset, ค่าใช้จ่าย, realtime/email/LINE notification หรือระบบแยกหลายอาคาร รูปต้นฉบับไม่ได้ลบ EXIF ผู้ใช้ควรใช้ภาพที่ไม่มีข้อมูลอ่อนไหวเกินจำเป็น
 
 ## Portfolio description
 
 > Built a Thai maintenance management system with Laravel, React/Inertia and PostgreSQL. Implemented role-based authorization, private photo access, transactional repair workflows with audit history, in-app notifications, automated integration/browser tests, and non-destructive code/database recovery.
 
 License: MIT. Sarabun font licensed under SIL OFL; see public/fonts/OFL.txt.
+
+## นัดหมายเข้าซ่อม (รุ่น 1.1)
+
+ผู้ดูแลเสนอช่วงเวลาในงานที่มอบหมายแล้วและยังไม่เริ่มซ่อม คนพักยืนยันหรือแจ้งว่าไม่สะดวกพร้อมเหตุผล ช่างเห็นนัดและเริ่มงานได้เมื่อนัดได้รับการยืนยัน งานเดิมที่ยังไม่เคยนัดผ่านระบบยังเริ่มงานตาม workflow เดิมได้
+
+- เวลาทั้งระบบแสดงเป็น Asia/Bangkok; ช่องวันเวลานัดใช้เวลาไทยเสมอ แม้เบราว์เซอร์อยู่เขตเวลาอื่น ข้อมูลนัดส่งพร้อม UTC offset และเก็บเป็น UTC
+- ช่วงนัดไม่เกิน 4 ชั่วโมง และเริ่มในอนาคตภายใน 90 วัน นัดรอยืนยันจองเวลาช่างไว้ด้วย เพื่อกันผู้ดูแลวางนัดซ้อน
+- ล็อกแถวช่างขณะตรวจ overlap และบันทึกนัด เพื่อให้คำขอจากคนละงานของช่างคนเดียวกันเรียงลำดับ ช่วงเวลาชนกันพอดีที่ขอบ เช่น 09–10 และ 10–11 ทำได้
+- การเปลี่ยนนัด/มอบหมายใหม่เพิ่ม version; คำตอบจากหน้าเก่าจะถูกปฏิเสธ การเปลี่ยนผู้รับผิดชอบยกเลิกนัดเดิมและต้องตกลงใหม่
+- ยกเลิกหรือปฏิเสธนัดจะคืนช่วงเวลาให้ช่าง ทุกการเสนอ/ยืนยัน/ปฏิเสธ/ยกเลิกมีประวัติและแจ้งเตือนในระบบ
+- Dashboard แสดงนัดที่ใกล้ถึงตามสิทธิ์ และปุ่มงานค้างเกิน 3 วันเปิดรายการที่กรองงานค้างจริง (ไม่รวมงานปิดหรือรอคนพักยืนยันผล)
+
+นัดหมายใช้วางแผนเวลา ไม่มีการส่ง LINE/email หรือแจ้งเตือนอัตโนมัติก่อนถึงนัด และไม่ได้บังคับว่าช่างต้องกดเริ่มตรงนาทีของนัด การเพิ่มตารางเป็น migration แบบเพิ่มคอลัมน์ ข้อมูลงานและรูปเดิมยังอยู่
+
+![ตัวอย่างนัดหมาย](docs/appointment-desktop.png)

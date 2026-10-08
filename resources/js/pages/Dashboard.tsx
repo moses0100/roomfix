@@ -9,17 +9,25 @@ import {
 } from "lucide-react";
 import Layout, { NewTicketButton, PageHeading } from "../components/Layout";
 import TicketTable, { categoryIcons } from "../components/TicketTable";
-import { categories, type Shared, type Ticket } from "../types";
+import {
+    categories,
+    appointmentDate,
+    appointmentStatuses,
+    type Shared,
+    type Ticket,
+} from "../types";
 export default function Dashboard({
     counts,
     recent,
     categories: distribution,
     overdue,
+    upcoming,
 }: {
     counts: Record<string, number>;
     recent: Ticket[];
     categories: { category: string; total: number }[];
     overdue: number;
+    upcoming: Ticket[];
 }) {
     const user = usePage<Shared>().props.auth.user!;
     const count = (...s: string[]) =>
@@ -136,9 +144,51 @@ export default function Dashboard({
                         <br />
                         เพื่อไม่ให้ผู้พักรอนาน
                     </p>
-                    <Link href="/tickets">ตรวจรายการทั้งหมด →</Link>
+                    <Link href="/tickets?overdue=1">
+                        ตรวจงานค้างเกิน 3 วัน →
+                    </Link>
                 </div>
             </div>
+            <section className="panel upcoming-panel">
+                <div className="section-heading">
+                    <div>
+                        <h2>นัดเข้าซ่อมที่กำลังจะถึง</h2>
+                        <p>นัดของงานที่คุณมีสิทธิ์ดู · เวลาประเทศไทย</p>
+                    </div>
+                    <Link href="/tickets?overdue=1">งานค้างเกิน 3 วัน →</Link>
+                </div>
+                {upcoming.length ? (
+                    <div className="upcoming-list">
+                        {upcoming.map((t) => (
+                            <Link key={t.id} href={`/tickets/${t.id}`}>
+                                <div>
+                                    <strong>{t.title}</strong>
+                                    <small>
+                                        ห้อง {t.room} · {t.assignee?.name}
+                                    </small>
+                                </div>
+                                <div>
+                                    <strong>
+                                        {appointmentDate(t.appointment_start!)}
+                                    </strong>
+                                    <small>
+                                        {
+                                            appointmentStatuses[
+                                                t.appointment_status!
+                                            ]
+                                        }
+                                    </small>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="upcoming-empty">
+                        ยังไม่มีนัดที่จะถึง
+                        ผู้ดูแลสามารถเสนอเวลาได้ในงานที่มอบหมายแล้ว
+                    </p>
+                )}
+            </section>
             <section className="panel">
                 <div className="section-heading">
                     <div>

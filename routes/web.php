@@ -22,6 +22,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/tickets/{ticket}', [TicketController::class, 'show']);
     Route::post('/tickets/{ticket}/assign', [TicketController::class, 'assign']);
     Route::post('/tickets/{ticket}/transition', [TicketController::class, 'transition']);
+    Route::post('/tickets/{ticket}/appointment', [TicketController::class, 'appointment'])->middleware('throttle:30,1');
     Route::post('/tickets/{ticket}/comments', [TicketController::class, 'comment'])->middleware('throttle:30,1');
     Route::get('/tickets/{ticket}/photos/{photo}', [TicketController::class, 'photo']);
     Route::get('/users', [UsersController::class, 'index']);

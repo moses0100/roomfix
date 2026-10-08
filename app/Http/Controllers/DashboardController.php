@@ -14,8 +14,11 @@ class DashboardController extends Controller
         $counts = (clone $query)->selectRaw('status, count(*) as total')->groupBy('status')->pluck('total', 'status');
         $recent = (clone $query)->with(['resident:id,name', 'assignee:id,name'])->latest()->limit(6)->get();
         $categories = (clone $query)->selectRaw('category, count(*) as total')->groupBy('category')->get();
-        $overdue = (clone $query)->whereIn('status', ['new', 'assigned', 'in_progress', 'reopened'])->where('created_at', '<', now()->subDays(3))->count();
+        $overdue = (clone $query)->overdue()->count();
+        $upcoming = (clone $query)->with(['resident:id,name', 'assignee:id,name'])->whereIn('status', ['assigned', 'in_progress'])
+            ->whereIn('appointment_status', ['pending', 'confirmed'])->where('appointment_end', '>=', now())
+            ->orderBy('appointment_start')->limit(5)->get();
 
-        return Inertia::render('Dashboard', compact('counts', 'recent', 'categories', 'overdue'));
+        return Inertia::render('Dashboard', compact('counts', 'recent', 'categories', 'overdue', 'upcoming'));
     }
 }

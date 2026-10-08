@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AppointmentRequest;
 use App\Http\Requests\StoreTicketRequest;
 use App\Http\Requests\TransitionTicketRequest;
 use App\Models\Ticket;
 use App\Models\TicketPhoto;
 use App\Models\User;
+use App\Services\AppointmentService;
 use App\Services\TicketService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -19,10 +21,11 @@ class TicketController extends Controller
 {
     public function index(Request $request)
     {
-        $filters = $request->validate(['q' => 'nullable|string|max:80', 'status' => 'nullable|in:new,assigned,in_progress,awaiting_confirmation,closed,reopened']);
+        $filters = $request->validate(['q' => 'nullable|string|max:80', 'status' => 'nullable|in:new,assigned,in_progress,awaiting_confirmation,closed,reopened', 'overdue' => 'nullable|boolean']);
         $tickets = Ticket::visibleTo($request->user())->with(['resident:id,name', 'assignee:id,name'])->withCount('photos')
             ->when($filters['q'] ?? null, fn ($q, $term) => $q->where(fn ($q) => $q->where('title', 'like', '%'.$term.'%')->orWhere('room', 'like', '%'.$term.'%')))
             ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
+            ->when($request->boolean('overdue'), fn ($q) => $q->overdue())
             ->latest()->paginate(12)->withQueryString();
 
         return Inertia::render('Tickets', compact('tickets', 'filters'));
@@ -86,6 +89,13 @@ class TicketController extends Controller
         $service->transition($ticket, $request->user(), $request->validated('action'), $request->validated('note'));
 
         return back()->with('success', 'อัปเดตสถานะงานแล้ว');
+    }
+
+    public function appointment(AppointmentRequest $request, Ticket $ticket, AppointmentService $service)
+    {
+        $service->update($ticket, $request->user(), $request->validated());
+
+        return back()->with('success', 'อัปเดตนัดหมายแล้ว แจ้งเตือนผู้เกี่ยวข้องในระบบ');
     }
 
     public function comment(Request $request, Ticket $ticket)

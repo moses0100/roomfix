@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import Layout, { Errors, PageHeading } from "../components/Layout";
 import { Status } from "../components/TicketTable";
+import AppointmentPanel from "../components/AppointmentPanel";
 import {
     categories,
     date,
@@ -158,6 +159,7 @@ export default function TicketDetail({
                     </section>
                 </div>
                 <aside>
+                    <AppointmentPanel ticket={ticket} user={user} />
                     <section className="panel action-panel">
                         <span className="action-icon">
                             <Wrench size={23} />
@@ -218,7 +220,14 @@ export default function TicketDetail({
                             ticket.status === "assigned" && (
                                 <button
                                     className="primary wide"
-                                    disabled={transition.processing}
+                                    disabled={
+                                        transition.processing ||
+                                        Boolean(
+                                            ticket.appointment_status &&
+                                            ticket.appointment_status !==
+                                                "confirmed",
+                                        )
+                                    }
                                     onClick={() => act("start")}
                                 >
                                     เริ่มดำเนินการ

@@ -21,6 +21,13 @@ export type Ticket = {
     updated_at: string;
     completion_note?: string | null;
     closed_at?: string | null;
+    appointment_start: string | null;
+    appointment_end: string | null;
+    appointment_status:
+        "pending" | "confirmed" | "declined" | "cancelled" | null;
+    appointment_version: number;
+    appointment_note: string | null;
+    appointment_response_note: string | null;
     photos?: { id: number; mime: string }[];
     photos_count?: number;
     events?: {
@@ -66,8 +73,24 @@ export const roles: Record<string, string> = {
 };
 export const date = (value: string) =>
     new Date(value).toLocaleString("th-TH", {
+        timeZone: "Asia/Bangkok",
         day: "numeric",
         month: "short",
         hour: "2-digit",
         minute: "2-digit",
     });
+export const appointmentDate = (value: string) =>
+    new Date(value).toLocaleString("th-TH", {
+        timeZone: "Asia/Bangkok",
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+    });
+export const appointmentStatuses = {
+    pending: "รอคนพักยืนยันนัด",
+    confirmed: "ยืนยันนัดแล้ว",
+    declined: "คนพักไม่สะดวก",
+    cancelled: "ยกเลิกนัดแล้ว",
+};

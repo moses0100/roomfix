@@ -9,11 +9,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Ticket extends Model
 {
-    protected $fillable = ['resident_id', 'assignee_id', 'room', 'title', 'description', 'category', 'urgency', 'status', 'completion_note', 'closed_at'];
+    protected $fillable = ['resident_id', 'assignee_id', 'room', 'title', 'description', 'category', 'urgency', 'status', 'completion_note', 'closed_at', 'appointment_start', 'appointment_end', 'appointment_status', 'appointment_version', 'appointment_note', 'appointment_response_note'];
 
     protected function casts(): array
     {
-        return ['closed_at' => 'datetime'];
+        return ['closed_at' => 'datetime', 'appointment_start' => 'immutable_datetime', 'appointment_end' => 'immutable_datetime', 'appointment_version' => 'integer'];
     }
 
     public function resident(): BelongsTo
@@ -45,5 +45,10 @@ class Ticket extends Model
         } elseif ($user->role !== 'manager') {
             $query->whereRaw('1 = 0');
         }
+    }
+
+    public function scopeOverdue(Builder $query): void
+    {
+        $query->whereIn('status', ['new', 'assigned', 'in_progress', 'reopened'])->where('created_at', '<', now()->subDays(3));
     }
 }

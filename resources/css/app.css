@@ -1923,3 +1923,152 @@ tbody tr:hover {
         padding: 4px 6px;
     }
 }
+.appointment-panel .section-heading h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.appointment-content {
+    padding: 22px;
+}
+.appointment-time {
+    display: block;
+    font-size: 13px;
+    line-height: 1.9;
+    margin: 12px 0;
+    color: #526d44;
+}
+.appointment-badge {
+    display: inline-flex;
+    padding: 4px 9px;
+    font-size: 11px;
+    border-radius: 6px;
+    background: #fbf1db;
+    color: #a1834c;
+}
+.appointment-badge.confirmed {
+    background: #e8f2e0;
+    color: #6b8754;
+}
+.appointment-badge.declined,
+.appointment-badge.cancelled {
+    background: #f5eae4;
+    color: #a77a61;
+}
+.appointment-content p {
+    font-size: 12px;
+}
+.appointment-content label {
+    font-size: 12px;
+    margin-top: 18px;
+}
+.appointment-content input {
+    max-width: 100%;
+    min-width: 0;
+    font-size: 12px;
+}
+.appointment-content small {
+    display: block;
+    font-size: 10px;
+    color: #8f9d81;
+    margin-bottom: 15px;
+}
+.cancel-appointment {
+    margin-top: 10px;
+}
+.appointment-hint {
+    padding: 12px;
+    background: #f7f4e7;
+    border-radius: 7px;
+    color: #968054 !important;
+    margin-top: 14px;
+}
+.upcoming-list > a {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 18px 23px;
+    border-bottom: 1px solid #ebf0e3;
+}
+.upcoming-list > a:last-child {
+    border: 0;
+}
+.upcoming-list strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+}
+.upcoming-list small {
+    display: block;
+    color: #90a080;
+    font-size: 11px;
+    margin-top: 5px;
+}
+.upcoming-empty {
+    padding: 22px 23px;
+    font-size: 12px;
+    margin: 0;
+}
+.filters {
+    flex-wrap: wrap;
+}
+.filters label.overdue-toggle {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex: 0 0 auto;
+    font-size: 11px;
+    color: #758968;
+}
+.overdue-toggle input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: #315c47;
+}
+.action-panel button[aria-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.appointment-content .primary {
+    margin-top: 8px;
+}
+@media (max-width: 700px) {
+    .upcoming-list > a {
+        flex-direction: column;
+        gap: 7px;
+        padding: 17px;
+    }
+    .upcoming-panel .section-heading {
+        flex-wrap: wrap;
+    }
+    .appointment-content {
+        padding: 19px;
+    }
+    .filters label.overdue-toggle {
+        width: auto;
+        flex: 1 0 100%;
+    }
+    .attention-card {
+        display: block;
+        padding: 18px;
+    }
+    .attention-card p {
+        display: none;
+    }
+    .attention-card h3 {
+        display: inline-block;
+        margin: 0 10px;
+    }
+    .attention-card > svg {
+        margin: 0;
+        vertical-align: middle;
+    }
+    .attention-card > strong {
+        font-size: 22px;
+    }
+    .attention-card a {
+        display: block;
+        margin-top: 8px;
+    }
+}
