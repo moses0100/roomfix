@@ -28,3 +28,12 @@ Branch: codex/roomfix-appointments. Additive migration adds booking fields on ex
 - Local Docker startup was recovered by moving aside only two stale socket directories (Docker/run and docker-secrets-engine, the latter containing only engine.sock). Existing volumes retained. The same startup error class is documented in https://github.com/docker/desktop-feedback/issues/527. No factory reset or database reset performed.
 - Full local browser suite: all 4 tests passed (appointment flow plus existing repair/privacy, manager management/search and mobile navigation). Screenshots inspected at desktop and 390 px mobile width; screenshot capture disables transient menu animation.
 - Reselecting the same assigned technician preserves a confirmed appointment and version; actual reassignment cancels it. Added a regression test for this distinction.
+
+## Report update — 2026-10-08
+
+- Branch: codex/roomfix-reports. Read-only reports; no schema migration or changes to existing ticket data.
+- Production build passes. Pint checks 52 PHP files. Full PHP suite passes 27 tests / 294 assertions.
+- Four report feature tests cover manager-only access for HTML and CSV, Thai midnight boundaries, current-status aggregation of tickets created in the date window, invalid/reversed/future/empty dates, UTF-8 CSV quoting and formula neutralization.
+- Two new Chrome tests cover real CSV download, applied filters, empty reports, resident access refusal, and the 390px mobile layout. Desktop/mobile report screenshots inspected.
+- Full local browser suite: 6 tests pass, including all existing appointment, repair/privacy, user-management and mobile-navigation workflows.
+- Pre-change code archive: backups/code/before-reports-20261008.zip. Recovery remains non-destructive; no app database reset.
