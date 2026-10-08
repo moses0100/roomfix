@@ -26,7 +26,7 @@ services:
     depends_on:
       database:
         condition: service_healthy
-    command: ["sh", "-c", "mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs storage/app/private bootstrap/cache && php artisan serve --host=0.0.0.0 --port=8000"]
+    command: ["sh", "-c", "mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs storage/app/private bootstrap/cache && php artisan serve --no-reload --host=0.0.0.0 --port=8000"]
     restart: unless-stopped
   database:
     image: postgres:17-alpine
