@@ -1,11 +1,28 @@
-import { useForm } from "@inertiajs/react";
+import { useForm, usePage } from "@inertiajs/react";
+import { type Shared } from "../types";
 import Layout, { Errors, PageHeading } from "../components/Layout";
 export default function Settings() {
+    const { isolated_demo } = usePage<Shared>().props;
     const form = useForm({
         current_password: "",
         password: "",
         password_confirmation: "",
     });
+    if (isolated_demo)
+        return (
+            <Layout title="ตั้งค่าบัญชี">
+                <PageHeading
+                    title="บัญชีทดลองใช้ร่วมกัน"
+                    subtitle="โหมดเดโมล็อกการเปลี่ยนรหัสผ่าน เพื่อให้ผู้ทดลองคนถัดไปยังเข้าสู่ระบบได้"
+                />
+                <section className="panel form-panel">
+                    <p>
+                        คุณยังทดลองแจ้งซ่อม นัดช่าง
+                        และติดตามงานได้ตามบทบาทที่เลือก
+                    </p>
+                </section>
+            </Layout>
+        );
     return (
         <Layout title="ตั้งค่าบัญชี">
             <PageHeading

@@ -43,6 +43,7 @@ export type Shared = {
     auth: { user: User | null };
     building: string;
     demo: boolean;
+    isolated_demo: boolean;
     unread: number;
     flash: { success?: string };
 };

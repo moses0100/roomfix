@@ -1,8 +1,9 @@
-import { useForm } from "@inertiajs/react";
+import { useForm, usePage } from "@inertiajs/react";
 import { UserPlus } from "lucide-react";
 import Layout, { Errors, PageHeading } from "../components/Layout";
-import { roles, type User } from "../types";
+import { roles, type User, type Shared } from "../types";
 export default function Users({ users }: { users: User[] }) {
+    const { isolated_demo } = usePage<Shared>().props;
     const form = useForm({
         name: "",
         email: "",
@@ -40,91 +41,101 @@ export default function Users({ users }: { users: User[] }) {
                         ))}
                     </div>
                 </section>
-                <form
-                    className="panel form-panel"
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        form.post("/users", {
-                            onSuccess: () => form.reset(),
-                            onFinish: () => form.reset("password"),
-                        });
-                    }}
-                >
-                    <h2>
-                        <UserPlus size={19} />
-                        เพิ่มบัญชี
-                    </h2>
-                    <label>
-                        ชื่อผู้ใช้งาน
-                        <input
-                            required
-                            maxLength={80}
-                            value={form.data.name}
-                            onChange={(e) =>
-                                form.setData("name", e.target.value)
-                            }
-                        />
-                    </label>
-                    <label>
-                        อีเมล
-                        <input
-                            required
-                            type="email"
-                            value={form.data.email}
-                            onChange={(e) =>
-                                form.setData("email", e.target.value)
-                            }
-                        />
-                    </label>
-                    <label>
-                        บทบาท
-                        <select
-                            value={form.data.role}
-                            onChange={(e) =>
-                                form.setData("role", e.target.value)
-                            }
-                        >
-                            <option value="resident">ผู้พักอาศัย</option>
-                            <option value="technician">ช่างซ่อม</option>
-                        </select>
-                    </label>
-                    {form.data.role === "resident" && (
+                {isolated_demo ? (
+                    <section className="panel form-panel">
+                        <h2>บัญชีตัวอย่างพร้อมใช้งาน</h2>
+                        <p>
+                            โหมดเดโมใช้บัญชีร่วมกัน จึงปิดการสร้างบัญชีใหม่ไว้
+                            ลองสลับบทบาทจากหน้าเข้าสู่ระบบได้ครับ
+                        </p>
+                    </section>
+                ) : (
+                    <form
+                        className="panel form-panel"
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            form.post("/users", {
+                                onSuccess: () => form.reset(),
+                                onFinish: () => form.reset("password"),
+                            });
+                        }}
+                    >
+                        <h2>
+                            <UserPlus size={19} />
+                            เพิ่มบัญชี
+                        </h2>
                         <label>
-                            เลขห้อง
+                            ชื่อผู้ใช้งาน
                             <input
                                 required
-                                maxLength={20}
-                                value={form.data.room}
+                                maxLength={80}
+                                value={form.data.name}
                                 onChange={(e) =>
-                                    form.setData("room", e.target.value)
+                                    form.setData("name", e.target.value)
                                 }
-                                placeholder="เช่น A-203"
                             />
                         </label>
-                    )}
-                    <label>
-                        รหัสผ่านเริ่มต้น
-                        <input
-                            required
-                            type="password"
-                            autoComplete="new-password"
-                            minLength={12}
-                            maxLength={200}
-                            value={form.data.password}
-                            onChange={(e) =>
-                                form.setData("password", e.target.value)
-                            }
-                        />
-                        <small>
-                            อย่างน้อย 12 ตัวอักษร
-                            แจ้งเจ้าของบัญชีผ่านช่องทางส่วนตัว
-                        </small>
-                    </label>
-                    <Errors errors={form.errors} />
-                    <button className="primary" disabled={form.processing}>
-                        สร้างบัญชี
-                    </button>
-                </form>
+                        <label>
+                            อีเมล
+                            <input
+                                required
+                                type="email"
+                                value={form.data.email}
+                                onChange={(e) =>
+                                    form.setData("email", e.target.value)
+                                }
+                            />
+                        </label>
+                        <label>
+                            บทบาท
+                            <select
+                                value={form.data.role}
+                                onChange={(e) =>
+                                    form.setData("role", e.target.value)
+                                }
+                            >
+                                <option value="resident">ผู้พักอาศัย</option>
+                                <option value="technician">ช่างซ่อม</option>
+                            </select>
+                        </label>
+                        {form.data.role === "resident" && (
+                            <label>
+                                เลขห้อง
+                                <input
+                                    required
+                                    maxLength={20}
+                                    value={form.data.room}
+                                    onChange={(e) =>
+                                        form.setData("room", e.target.value)
+                                    }
+                                    placeholder="เช่น A-203"
+                                />
+                            </label>
+                        )}
+                        <label>
+                            รหัสผ่านเริ่มต้น
+                            <input
+                                required
+                                type="password"
+                                autoComplete="new-password"
+                                minLength={12}
+                                maxLength={200}
+                                value={form.data.password}
+                                onChange={(e) =>
+                                    form.setData("password", e.target.value)
+                                }
+                            />
+                            <small>
+                                อย่างน้อย 12 ตัวอักษร
+                                แจ้งเจ้าของบัญชีผ่านช่องทางส่วนตัว
+                            </small>
+                        </label>
+                        <Errors errors={form.errors} />
+                        <button className="primary" disabled={form.processing}>
+                            สร้างบัญชี
+                        </button>
+                    </form>
+                )}
             </div>
         </Layout>
     );

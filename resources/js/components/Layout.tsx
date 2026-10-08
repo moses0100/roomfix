@@ -23,7 +23,8 @@ export default function Layout({
     title: string;
     children: ReactNode;
 }) {
-    const { auth, building, unread, flash } = usePage<Shared>().props;
+    const { auth, building, unread, flash, isolated_demo } =
+        usePage<Shared>().props;
     const user = auth.user!;
     const [open, setOpen] = useState(false);
     const url = usePage().url;
@@ -145,6 +146,16 @@ export default function Layout({
                         </div>
                     </header>
                     <main>
+                        {isolated_demo && (
+                            <div className="demo-notice" role="note">
+                                <strong>พื้นที่ทดลองร่วมกัน</strong>
+                                <span>
+                                    ใช้ข้อมูลสมมติเท่านั้น
+                                    ทุกคนในบทบาทเดียวกันเห็นข้อมูลร่วมกัน
+                                    ผู้ดูแลอาจรีเซ็ตงานและออกจากระบบได้
+                                </span>
+                            </div>
+                        )}
                         {flash.success && (
                             <div className="flash" role="status">
                                 <Check size={17} />

@@ -10,7 +10,7 @@ import {
 import { type Shared } from "../types";
 import { Errors } from "../components/Layout";
 export default function Login() {
-    const { building, demo } = usePage<Shared>().props;
+    const { building, demo, isolated_demo } = usePage<Shared>().props;
     const form = useForm({ email: "", password: "" });
     return (
         <>
@@ -143,7 +143,9 @@ export default function Login() {
                                     ))}
                                 </div>
                                 <small>
-                                    ข้อมูลสมมติสำหรับ demo ในเครื่องเท่านั้น
+                                    {isolated_demo
+                                        ? "พื้นที่ทดลองร่วมกัน · ใช้ข้อมูลสมมติเท่านั้น · งานอาจถูกรีเซ็ต"
+                                        : "ข้อมูลสมมติสำหรับ demo ในเครื่องเท่านั้น"}
                                 </small>
                             </div>
                         )}
