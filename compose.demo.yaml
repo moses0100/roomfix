@@ -1,0 +1,48 @@
+name: roomfix-demo
+services:
+  app:
+    image: roomfix-php:local
+    build: .
+    env_file: .env.demo
+    ports: ["127.0.0.1:8004:8000"]
+    volumes:
+      - .:/app
+      - demo-vendor:/app/vendor
+      - demo-storage:/app/storage
+      - demo-bootstrap:/app/bootstrap/cache
+      - ./docker/php.ini:/usr/local/etc/php/conf.d/roomfix.ini:ro
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: http://127.0.0.1:8004
+      ROOMFIX_DEMO: "true"
+      ROOMFIX_ISOLATED_DEMO: "true"
+      DB_CONNECTION: pgsql
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_DATABASE: roomfix_demo
+      DB_USERNAME: roomfix_demo
+      SESSION_COOKIE: roomfix_demo_session
+    depends_on:
+      database:
+        condition: service_healthy
+    command: ["sh", "-c", "mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs storage/app/private bootstrap/cache && php artisan serve --host=0.0.0.0 --port=8000"]
+    restart: unless-stopped
+  database:
+    image: postgres:17-alpine
+    env_file: .env.demo
+    environment:
+      POSTGRES_DB: roomfix_demo
+      POSTGRES_USER: roomfix_demo
+    volumes: ["demo-data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U roomfix_demo -d roomfix_demo"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+volumes:
+  demo-data:
+  demo-storage:
+  demo-bootstrap:
+  demo-vendor:
