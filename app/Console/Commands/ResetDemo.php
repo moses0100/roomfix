@@ -43,8 +43,11 @@ class ResetDemo extends Command
                 app(DemoSeeder::class)->run();
             });
         } finally {
-            $sandbox->unlock(true);
-            $this->callSilent('up');
+            try {
+                $sandbox->unlock(true);
+            } finally {
+                $this->callSilent('up');
+            }
         }
         $this->info('Demo restored: 4 accounts and 6 tickets. Sessions invalidated.');
         $this->line('Uploaded files retained in the isolated demo volume; no production data or files touched.');

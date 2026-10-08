@@ -19,6 +19,16 @@ class DemoSandboxTest extends TestCase
         app(DemoSandbox::class)->assertIsolated();
     }
 
+    public function test_operator_check_is_read_only_in_both_modes(): void
+    {
+        User::factory()->create();
+        config(['roomfix.demo' => true, 'roomfix.isolated_demo' => false]);
+        $this->artisan('roomfix:demo-check')->assertFailed();
+        config(['roomfix.isolated_demo' => true]);
+        $this->artisan('roomfix:demo-check')->assertSuccessful();
+        $this->assertDatabaseCount('users', 1);
+    }
+
     public function test_misconfigured_demo_stops_web_access(): void
     {
         config(['roomfix.demo' => false, 'roomfix.isolated_demo' => true]);
@@ -50,6 +60,14 @@ class DemoSandboxTest extends TestCase
         config(['roomfix.demo' => true, 'roomfix.isolated_demo' => true, 'app.debug' => false]);
         app()->instance('env', 'production');
         $this->expectException(\RuntimeException::class);
+        app(DemoSandbox::class)->assertIsolated();
+    }
+
+    public function test_production_demo_refuses_debug_output(): void
+    {
+        config(['roomfix.demo' => true, 'roomfix.isolated_demo' => true, 'app.debug' => true]);
+        app()->instance('env', 'production');
+        $this->expectExceptionMessage('Production demo requires APP_DEBUG=false.');
         app(DemoSandbox::class)->assertIsolated();
     }
 }
