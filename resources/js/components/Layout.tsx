@@ -1,6 +1,7 @@
 import { Head, Link, router, usePage } from "@inertiajs/react";
 import {
     Bell,
+    BarChart3,
     Building2,
     Check,
     ClipboardList,
@@ -38,7 +39,10 @@ export default function Layout({
         },
         { href: "/notifications", label: "การแจ้งเตือน", Icon: Bell },
         ...(user.role === "manager"
-            ? [{ href: "/users", label: "ผู้ใช้งาน", Icon: Users }]
+            ? [
+                  { href: "/reports", label: "รายงานงานซ่อม", Icon: BarChart3 },
+                  { href: "/users", label: "ผู้ใช้งาน", Icon: Users },
+              ]
             : []),
         { href: "/settings", label: "ตั้งค่าบัญชี", Icon: Settings },
     ];
