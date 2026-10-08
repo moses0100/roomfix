@@ -4,13 +4,16 @@ namespace Database\Seeders;
 
 use App\Models\Ticket;
 use App\Models\User;
+use App\Services\DemoSandbox;
 use Illuminate\Database\Seeder;
 
 class DemoSeeder extends Seeder
 {
     public function run(): void
     {
-        if (! app()->environment('local', 'testing')) {
+        if (config('roomfix.isolated_demo')) {
+            app(DemoSandbox::class)->assertIsolated();
+        } elseif (! app()->environment('local', 'testing')) {
             throw new \RuntimeException('Demo accounts are forbidden outside local/testing');
         }
         $make = fn ($email, $name, $role, $room = null) => User::firstOrCreate(['email' => $email], ['name' => $name, 'role' => $role, 'room' => $room, 'password' => 'RoomFixDemo!2026']);

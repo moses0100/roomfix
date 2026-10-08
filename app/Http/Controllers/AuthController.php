@@ -36,6 +36,7 @@ class AuthController extends Controller
 
     public function password(Request $request)
     {
+        abort_if(config('roomfix.isolated_demo'), 403, 'บัญชีเดโมใช้ร่วมกัน จึงเปลี่ยนรหัสผ่านไม่ได้');
         $data = $request->validate(['current_password' => 'required|current_password', 'password' => 'required|string|min:12|max:200|confirmed']);
         $request->user()->update(['password' => $data['password']]);
         $request->session()->regenerate();
