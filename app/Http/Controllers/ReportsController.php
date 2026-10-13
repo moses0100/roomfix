@@ -39,9 +39,9 @@ class ReportsController extends Controller
         return response()->streamDownload(function () use ($query) {
             $output = fopen('php://output', 'w');
             fwrite($output, "\xEF\xBB\xBF"); // UTF-8 BOM for Thai text in spreadsheet apps.
-            fputcsv($output, ['รหัสงาน', 'หัวข้อ', 'ห้อง', 'ประเภท', 'สถานะ', 'ช่าง', 'วันที่แจ้ง (เวลาไทย)', 'วันที่ปิด (เวลาไทย)'], ',', '"', '');
+            fputcsv($output, ['รหัสงาน', 'หัวข้อ', 'ห้อง', 'ประเภท', 'สถานะ', 'ช่าง', 'วันที่แจ้ง (เวลาไทย)', 'วันที่ปิด (เวลาไทย)', 'ความเร่งด่วน'], ',', '"', '');
             foreach ($query->lazyById(500) as $ticket) {
-                $row = [$ticket->id, $ticket->title, $ticket->room, $ticket->category, $ticket->status, $ticket->assignee?->name ?? '', $ticket->created_at->timezone('Asia/Bangkok')->format('Y-m-d H:i'), $ticket->closed_at?->timezone('Asia/Bangkok')->format('Y-m-d H:i') ?? ''];
+                $row = [$ticket->id, $ticket->title, $ticket->room, $ticket->category, $ticket->status, $ticket->assignee?->name ?? '', $ticket->created_at->timezone('Asia/Bangkok')->format('Y-m-d H:i'), $ticket->closed_at?->timezone('Asia/Bangkok')->format('Y-m-d H:i') ?? '', $ticket->urgency];
                 // Quoting CSV alone does not stop spreadsheet formula execution.
                 $row = array_map(fn ($value) => is_string($value) && preg_match('/^[\s\x{FEFF}]*[=+@-]/u', $value) ? "'".$value : $value, $row);
                 fputcsv($output, $row, ',', '"', '');

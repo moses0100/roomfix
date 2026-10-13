@@ -76,4 +76,27 @@ class ReportsTest extends TestCase
         $this->assertStringNotContainsString('excluded', $content);
         $this->assertStringContainsString('no-store', $response->headers->get('Cache-Control'));
     }
+
+    public function test_csv_appends_all_urgency_levels_without_moving_existing_columns(): void
+    {
+        $this->travelTo(now()->setDate(2026, 10, 8));
+        foreach (['normal', 'high', 'urgent'] as $urgency) {
+            $this->job('2026-10-01 12:00:00')->update(['urgency' => $urgency]);
+        }
+        $response = $this->actingAs(User::factory()->create(['role' => 'manager']))
+            ->get('/reports/export?from=2026-10-01&to=2026-10-01')->assertOk();
+        $stream = fopen('php://memory', 'r+');
+        fwrite($stream, substr($response->streamedContent(), 3));
+        rewind($stream);
+        $header = fgetcsv($stream, null, ',', '"', '');
+        $this->assertSame(['รหัสงาน', 'หัวข้อ', 'ห้อง', 'ประเภท', 'สถานะ', 'ช่าง', 'วันที่แจ้ง (เวลาไทย)', 'วันที่ปิด (เวลาไทย)', 'ความเร่งด่วน'], $header);
+        foreach (['normal', 'high', 'urgent'] as $urgency) {
+            $row = fgetcsv($stream, null, ',', '"', '');
+            $this->assertCount(9, $row);
+            $this->assertSame('2026-10-01 19:00', $row[6]);
+            $this->assertSame($urgency, $row[8]);
+        }
+        $this->assertFalse(fgetcsv($stream, null, ',', '"', ''));
+        fclose($stream);
+    }
 }
