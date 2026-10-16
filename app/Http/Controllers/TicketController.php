@@ -23,7 +23,7 @@ class TicketController extends Controller
     {
         $filters = $request->validate(['q' => 'nullable|string|max:80', 'status' => 'nullable|in:new,assigned,in_progress,awaiting_confirmation,closed,reopened', 'overdue' => 'nullable|boolean']);
         $tickets = Ticket::visibleTo($request->user())->with(['resident:id,name', 'assignee:id,name'])->withCount('photos')
-            ->when($filters['q'] ?? null, fn ($q, $term) => $q->where(fn ($q) => $q->where('title', 'like', '%'.$term.'%')->orWhere('room', 'like', '%'.$term.'%')))
+            ->when($request->filled('q'), fn ($q) => $q->where(fn ($q) => $q->where('title', 'like', '%'.$filters['q'].'%')->orWhere('room', 'like', '%'.$filters['q'].'%')))
             ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
             ->when($request->boolean('overdue'), fn ($q) => $q->overdue())
             ->latest()->paginate(12)->withQueryString();
