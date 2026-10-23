@@ -6,6 +6,7 @@ use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class TicketSearchTest extends TestCase
@@ -53,5 +54,36 @@ class TicketSearchTest extends TestCase
             $this->actingAs($resident)->get($url)
                 ->assertInertia(fn (Assert $page) => $page->component('Tickets')->where('tickets.total', 2));
         }
+    }
+
+    public static function literalSearchTerms(): array
+    {
+        return [['%'], ['_'], ['!'], ['!%'], ['\\']];
+    }
+
+    #[DataProvider('literalSearchTerms')]
+    public function test_literal_search_matches_special_characters_in_titles_and_rooms(string $term): void
+    {
+        $resident = User::factory()->create(['role' => 'resident']);
+        $titleMatch = $this->job($resident, 'หน้าจอแสดง '.$term, 'A-111');
+        $roomMatch = $this->job($resident, 'ประตูชำรุด', 'B'.$term.'222');
+        $this->job($resident, 'ไฟเสีย', 'C-333');
+        $this->actingAs(User::factory()->create(['role' => 'manager']))->get('/tickets?q='.rawurlencode($term))
+            ->assertInertia(fn (Assert $page) => $page->component('Tickets')
+                ->where('filters.q', $term)->where('tickets.total', 2)
+                ->where('tickets.data', fn ($tickets) => collect($tickets)->pluck('id')->sort()->values()->all() === [$titleMatch->id, $roomMatch->id]));
+    }
+
+    public function test_literal_search_still_restricts_residents_to_their_own_jobs(): void
+    {
+        $resident = User::factory()->create(['role' => 'resident']);
+        $other = User::factory()->create(['role' => 'resident']);
+        $own = $this->job($resident, 'หน้าจอแสดง 10%', 'A-111');
+        $this->job($resident, 'ไฟเสีย', 'A-111');
+        $this->job($other, 'หน้าจอแสดง 10%', 'B-111');
+        $this->job($other, 'ประตูชำรุด', 'B%222');
+        $this->actingAs($resident)->get('/tickets?q=%25')
+            ->assertInertia(fn (Assert $page) => $page->component('Tickets')
+                ->where('tickets.total', 1)->where('tickets.data.0.id', $own->id));
     }
 }

@@ -22,8 +22,10 @@ class TicketController extends Controller
     public function index(Request $request)
     {
         $filters = $request->validate(['q' => 'nullable|string|max:80', 'status' => 'nullable|in:new,assigned,in_progress,awaiting_confirmation,closed,reopened', 'overdue' => 'nullable|boolean']);
+        // Treat user input literally, including SQL LIKE wildcards and the escape character.
+        $pattern = '%'.strtr($filters['q'] ?? '', ['!' => '!!', '%' => '!%', '_' => '!_']).'%';
         $tickets = Ticket::visibleTo($request->user())->with(['resident:id,name', 'assignee:id,name'])->withCount('photos')
-            ->when($request->filled('q'), fn ($q) => $q->where(fn ($q) => $q->where('title', 'like', '%'.$filters['q'].'%')->orWhere('room', 'like', '%'.$filters['q'].'%')))
+            ->when($request->filled('q'), fn ($q) => $q->where(fn ($q) => $q->whereRaw("title like ? escape '!'", [$pattern])->orWhereRaw("room like ? escape '!'", [$pattern])))
             ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
             ->when($request->boolean('overdue'), fn ($q) => $q->overdue())
             ->latest()->paginate(12)->withQueryString();
