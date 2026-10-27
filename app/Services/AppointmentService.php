@@ -49,7 +49,7 @@ class AppointmentService
                 $changes['appointment_status'] = 'cancelled';
                 $message = 'ผู้ดูแลยกเลิกนัดเข้าซ่อม';
             } else {
-                if ($locked->appointment_status !== 'pending' || $locked->appointment_end->isPast()) {
+                if ($locked->appointment_status !== 'pending' || $locked->appointment_end->lessThanOrEqualTo(now())) {
                     $this->reject('นัดนี้ตอบรับไปแล้วหรือหมดเวลา กรุณารอผู้ดูแลเสนอนัดใหม่');
                 }
                 $changes['appointment_status'] = $action === 'confirm' ? 'confirmed' : 'declined';

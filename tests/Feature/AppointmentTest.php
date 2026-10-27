@@ -6,6 +6,7 @@ use App\Models\Ticket;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class AppointmentTest extends TestCase
@@ -155,5 +156,34 @@ class AppointmentTest extends TestCase
         $this->job($other)->forceFill(['created_at' => now()->subDays(5)])->save();
         $this->actingAs($this->owner)->get('/tickets?overdue=1')->assertInertia(fn (Assert $page) => $page->has('tickets.data', 1)->where('tickets.data.0.id', $old->id));
         $this->get('/dashboard')->assertInertia(fn (Assert $page) => $page->where('overdue', 1));
+    }
+
+    public static function expiredResponses(): array
+    {
+        return [['confirm', 0], ['decline', 0], ['confirm', 1], ['decline', 1]];
+    }
+
+    #[DataProvider('expiredResponses')]
+    public function test_appointment_cannot_be_answered_at_or_after_its_end(string $action, int $secondsAfter): void
+    {
+        $ticket = $this->job();
+        $this->actingAs($this->manager)->post("/tickets/$ticket->id/appointment", $this->proposal($ticket))->assertRedirect();
+        $this->travelTo($ticket->fresh()->appointment_end->copy()->addSeconds($secondsAfter));
+        $this->actingAs($this->owner)->post("/tickets/$ticket->id/appointment", ['action' => $action, 'version' => 1, 'note' => 'แจ้งเวลาที่สะดวกใหม่'])
+            ->assertSessionHasErrors('appointment');
+        $this->assertSame('pending', $ticket->fresh()->appointment_status);
+        $this->assertSame(1, $ticket->fresh()->appointment_version);
+        $this->assertSame(1, $ticket->events()->count());
+    }
+
+    public function test_appointment_can_still_be_confirmed_just_before_its_end(): void
+    {
+        $ticket = $this->job();
+        $this->actingAs($this->manager)->post("/tickets/$ticket->id/appointment", $this->proposal($ticket))->assertRedirect();
+        $this->travelTo($ticket->fresh()->appointment_end->copy()->subSecond());
+        $this->actingAs($this->owner)->post("/tickets/$ticket->id/appointment", ['action' => 'confirm', 'version' => 1])
+            ->assertSessionHasNoErrors()->assertRedirect();
+        $this->assertSame('confirmed', $ticket->fresh()->appointment_status);
+        $this->assertSame(2, $ticket->fresh()->appointment_version);
     }
 }
