@@ -186,4 +186,32 @@ class AppointmentTest extends TestCase
         $this->assertSame('confirmed', $ticket->fresh()->appointment_status);
         $this->assertSame(2, $ticket->fresh()->appointment_version);
     }
+
+    public static function proposalNotes(): array
+    {
+        return [['เตรียมพื้นที่ใต้ซิงก์'], ['0'], [null]];
+    }
+
+    #[DataProvider('proposalNotes')]
+    public function test_proposal_notifications_preserve_notes_and_only_reach_related_users(?string $note): void
+    {
+        $ticket = $this->job();
+        $unrelated = User::factory()->create(['role' => 'resident']);
+        $this->actingAs($this->manager)->post("/tickets/$ticket->id/appointment", $this->proposal($ticket, ['note' => $note]))
+            ->assertSessionHasNoErrors()->assertRedirect();
+        $message = $ticket->events()->sole()->message;
+        if ($note !== null) {
+            $this->assertStringEndsWith(': '.$note, $message);
+        } else {
+            $this->assertStringEndsWith('(เวลาไทย)', $message);
+        }
+        foreach ([$this->owner, $this->tech] as $recipient) {
+            $notification = $recipient->notifications()->sole();
+            $this->assertSame($message, $notification->data['message']);
+            $this->assertSame($ticket->id, $notification->data['ticket_id']);
+        }
+        $this->assertSame($note, $ticket->fresh()->appointment_note);
+        $this->assertSame(0, $this->manager->notifications()->count());
+        $this->assertSame(0, $unrelated->notifications()->count());
+    }
 }

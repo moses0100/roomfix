@@ -56,8 +56,11 @@ class AppointmentService
                 $changes['appointment_response_note'] = $action === 'decline' ? $data['note'] : null;
                 $message = $action === 'confirm' ? 'คนพักยืนยันนัดเข้าซ่อม' : 'คนพักไม่สะดวกตามนัด: '.$data['note'];
             }
+            if ($action === 'propose' && isset($data['note']) && $data['note'] !== '') {
+                $message .= ': '.$data['note'];
+            }
             $locked->update($changes);
-            $locked->events()->create(['actor_id' => $actor->id, 'action' => 'appointment_'.$action, 'message' => $message.($action === 'propose' && ! empty($data['note']) ? ': '.$data['note'] : '')]);
+            $locked->events()->create(['actor_id' => $actor->id, 'action' => 'appointment_'.$action, 'message' => $message]);
             app(TicketService::class)->notify($locked, $actor, $message);
         });
     }
